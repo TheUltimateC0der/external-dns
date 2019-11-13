@@ -27,8 +27,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/route53"
-	"github.com/kubernetes-incubator/external-dns/endpoint"
-	"github.com/kubernetes-incubator/external-dns/plan"
+	"github.com/kubernetes-sigs/external-dns/endpoint"
+	"github.com/kubernetes-sigs/external-dns/plan"
 	"github.com/linki/instrumented_http"
 	log "github.com/sirupsen/logrus"
 )
@@ -42,6 +42,7 @@ const (
 
 var (
 	// see: https://docs.aws.amazon.com/general/latest/gr/rande.html#elb_region
+	// and: https://docs.aws.amazon.com/govcloud-us/latest/UserGuide/using-govcloud-endpoints.html
 	canonicalHostedZones = map[string]string{
 		// Application Load Balancers and Classic Load Balancers
 		"us-east-2.elb.amazonaws.com":         "Z3AADJGX6KTTL2",
@@ -63,6 +64,8 @@ var (
 		"sa-east-1.elb.amazonaws.com":         "Z2P70J7HTTTPLU",
 		"cn-north-1.elb.amazonaws.com.cn":     "Z3BX2TMKNYI13Y",
 		"cn-northwest-1.elb.amazonaws.com.cn": "Z3BX2TMKNYI13Y",
+		"us-gov-west-1.amazonaws.com":         "Z1K6XKP9SAGWDV",
+		"me-south-1.elb.amazonaws.com":        "ZS929ML54UICD",
 		// Network Load Balancers
 		"elb.us-east-2.amazonaws.com":         "ZLMOA37VPKANP",
 		"elb.us-east-1.amazonaws.com":         "Z26RNL4JYFTOTI",
@@ -82,6 +85,7 @@ var (
 		"elb.sa-east-1.amazonaws.com":         "ZTK26PT1VY4CU",
 		"elb.cn-north-1.amazonaws.com.cn":     "Z3QFB96KMJ7ED6",
 		"elb.cn-northwest-1.amazonaws.com.cn": "ZQEIKTCZ8352D",
+		"elb.me-south-1.amazonaws.com":        "Z3QSRYVP46NYYV",
 	}
 )
 
@@ -246,7 +250,7 @@ func (p *AWSProvider) records(zones map[string]*route53.HostedZone) ([]*endpoint
 	f := func(resp *route53.ListResourceRecordSetsOutput, lastPage bool) (shouldContinue bool) {
 		for _, r := range resp.ResourceRecordSets {
 			// TODO(linki, ownership): Remove once ownership system is in place.
-			// See: https://github.com/kubernetes-incubator/external-dns/pull/122/files/74e2c3d3e237411e619aefc5aab694742001cdec#r109863370
+			// See: https://github.com/kubernetes-sigs/external-dns/pull/122/files/74e2c3d3e237411e619aefc5aab694742001cdec#r109863370
 
 			if !supportedRecordType(aws.StringValue(r.Type)) {
 				continue
@@ -369,7 +373,7 @@ func (p *AWSProvider) submitChanges(changes []*route53.Change, zones map[string]
 
 		for i, b := range batchCs {
 			for _, c := range b {
-				log.Infof("Desired change: %s %s %s", *c.Action, *c.ResourceRecordSet.Name, *c.ResourceRecordSet.Type)
+				log.Infof("Desired change: %s %s %s [Id: %s]", *c.Action, *c.ResourceRecordSet.Name, *c.ResourceRecordSet.Type, z)
 			}
 
 			if !p.dryRun {
@@ -381,10 +385,12 @@ func (p *AWSProvider) submitChanges(changes []*route53.Change, zones map[string]
 				}
 
 				if _, err := p.client.ChangeResourceRecordSets(params); err != nil {
+					log.Errorf("Failure in zone %s [Id: %s]", aws.StringValue(zones[z].Name), z)
 					log.Error(err) //TODO(ideahitme): consider changing the interface in cases when this error might be a concern for other components
 					failedUpdate = true
 				} else {
-					log.Infof("%d record(s) in zone %s were successfully updated", len(b), aws.StringValue(zones[z].Name))
+					// z is the R53 Hosted Zone ID already as aws.StringValue
+					log.Infof("%d record(s) in zone %s [Id: %s] were successfully updated", len(b), aws.StringValue(zones[z].Name), z)
 				}
 
 				if i != len(batchCs)-1 {

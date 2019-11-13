@@ -28,7 +28,7 @@ import (
 	contour "github.com/heptio/contour/apis/generated/clientset/versioned"
 	contourinformers "github.com/heptio/contour/apis/generated/informers/externalversions"
 	extinformers "github.com/heptio/contour/apis/generated/informers/externalversions/contour/v1beta1"
-	"github.com/kubernetes-incubator/external-dns/endpoint"
+	"github.com/kubernetes-sigs/external-dns/endpoint"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -304,9 +304,10 @@ func (sc *ingressRouteSource) endpointsFromIngressRoute(ingressRoute *contourapi
 
 	providerSpecific := getProviderSpecificAnnotations(ingressRoute.Annotations)
 
-	host := ingressRoute.Spec.VirtualHost.Fqdn
-	if host != "" {
-		endpoints = append(endpoints, endpointsForHostname(host, targets, ttl, providerSpecific)...)
+	if virtualHost := ingressRoute.Spec.VirtualHost; virtualHost != nil {
+		if fqdn := virtualHost.Fqdn; fqdn != "" {
+			endpoints = append(endpoints, endpointsForHostname(fqdn, targets, ttl, providerSpecific)...)
+		}
 	}
 
 	// Skip endpoints if we do not want entries from annotations

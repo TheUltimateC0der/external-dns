@@ -22,7 +22,7 @@ import (
 	istionetworking "istio.io/api/networking/v1alpha3"
 	istiomodel "istio.io/istio/pilot/pkg/model"
 
-	"github.com/kubernetes-incubator/external-dns/endpoint"
+	"github.com/kubernetes-sigs/external-dns/endpoint"
 
 	"strconv"
 	"sync"
@@ -183,6 +183,25 @@ func testEndpointsFromGatewayConfig(t *testing.T) {
 			config: fakeGatewayConfig{
 				dnsnames: [][]string{
 					{"foo.bar"}, // Kubernetes requires removal of trailing dot
+				},
+			},
+			expected: []*endpoint.Endpoint{
+				{
+					DNSName: "foo.bar",
+					Targets: endpoint.Targets{"lb.com"},
+				},
+			},
+		},
+		{
+			title: "one namespaced rule.host one lb.hostname",
+			lbServices: []fakeIngressGatewayService{
+				{
+					hostnames: []string{"lb.com"}, // Kubernetes omits the trailing dot
+				},
+			},
+			config: fakeGatewayConfig{
+				dnsnames: [][]string{
+					{"my-namespace/foo.bar"}, // Kubernetes requires removal of trailing dot
 				},
 			},
 			expected: []*endpoint.Endpoint{

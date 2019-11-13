@@ -1,3 +1,44 @@
+## v0.5.17 - 2019-09-17
+
+  - Exoscale: add context support (#1193) @greut
+  - Cloudflare: Support API Token Auth (#1189) @Evesy
+  - AWS: Fix IAM Roles for Service Accounts permission problem (#1185) @serialx
+  - Core: Upgrade go version to 1.13 in external-dns (#1184) @tariq1890
+  - AWS: Update the AWS SDK to support Web Identity providers for IAM credentials (#1182) @MarcusNoble
+  - Docs: Update rfc2136 tutorial for use with Microsoft DNS (#1178) @bjschafer
+  - AWS: Update the AWS go SDK to support AWS IAM for Service Accounts (#1172) @micahhausler
+  - AWS-SD: Add support for AWS Network Load Balancers (#1170) @vanekjar
+  - Core: Add create-only policy (#1160) @danieldabate
+  - AWS: Fix --aws-api-retries (#1158) @coreypobrien
+  - Source: Support delegate Heptio Contour IngressRoutes (#1144) @jonasrmichel
+  - Core: TXTRegistry: do not overwrite labels of records returned by the provider (#1136) @multi-io
+  - Infoblox: Fixing incorrect match of zone dns names (#1128) @gregsidelinger
+  - Source: Improvements to the source CRD (#1107) @JoaoBraveCoding
+  - Core: Fix txt prefix bug (#1013) @p53
+
+## v0.5.16 - 2019-08-16
+
+  - Fix flaky unit test in provider package (#1151) @tariq1890
+  - Dockerfile: Update version of base images (#1148) @tariq1890
+  - DigitalOcean: Update `godo` to the latest stable version (#1145) @tariq1890
+  - Fix build pipeline for Go v1.13 (#1142) @linki
+  - AWS: Add Hosted Zone ID to logging output (#1129) @helgi
+  - IstioGateway: Support namespaces on hostnames (#1124) @dcherman
+  - AWS: Document `--prefer-cname` flag (#1123) @dbluxo
+  - Add Tutorial for DNSimple provider (#1121) @marc-sensenich
+  - Update Go version and golangci-lint to the latest release (#1120) @njuettner
+  - Allow compilation on 32bit machines (#1116) @mylesagray
+  - AWS: Allow to force usage of CNAME over ALIAS (#1103) @linki
+  - CoreDNS: add option to specify prefix name (#1102) @xunpan
+  - New provider: Rancher DNS (RDNS) (#1098) @Jason-ZW
+  - Document where e2e tests are currently located (#1094) @jaypipes
+  - Add initial KEP for ExternalDNS (#1092) @Raffo
+  - Update Dockerfiles to follow best practices (#1091) @taharah
+  - New Source: Heptio Contour IngressRoute (#1084) @jonasrmichel
+  - AWS: Add dualstack support with ALB ingress controllers (#1079) @twilfong
+  - Allow handling of multiple Oracle Cloud (OCI) zones (#1061) @suman-ganta
+  - Namespace exposed metrics with the external_dns prefix (#794) @linki
+
 ## v0.5.15 - 2019-07-03
 
   - RFC2136: Fix when merging multiple targets (#1082) @hachh
