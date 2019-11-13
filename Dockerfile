@@ -13,22 +13,23 @@
 # limitations under the License.
 
 # builder image
-FROM golang:1.12.7 as builder
+FROM golang:1.13 as builder
 
-WORKDIR /github.com/kubernetes-incubator/external-dns
+WORKDIR /github.com/kubernetes-sigs/external-dns
+
 COPY . .
 RUN go mod vendor && \
     make test && \
     make build
 
 # final image
-FROM alpine:3.9
+FROM alpine:3.10
 LABEL maintainer="Team Teapot @ Zalando SE <team-teapot@zalando.de>"
 
 RUN apk add --no-cache ca-certificates && \
     update-ca-certificates
 
-COPY --from=builder /github.com/kubernetes-incubator/external-dns/build/external-dns /bin/external-dns
+COPY --from=builder /github.com/kubernetes-sigs/external-dns/build/external-dns /bin/external-dns
 
 # Run as UID for nobody since k8s pod securityContext runAsNonRoot can't resolve the user ID:
 # https://github.com/kubernetes/kubernetes/issues/40958
